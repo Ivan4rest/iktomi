@@ -1,15 +1,47 @@
-const int SENSOR_HOLL_PIN = 0;
+int hallMatrixWidth = 3;
+int hallMatrixLength = 3;
 
-int hallSignal = 0;
+int hallSignals[3][3];
 
 void setup() {
   Serial.begin(9600);
-  pinMode(SENSOR_HOLL_PIN, INPUT);
 }
 
 void loop() {
-  hallSignal = analogRead(SENSOR_HOLL_PIN);
-  Serial.println(hallSignal);
-  hallSignal = abs(map(hallSignal, 0, 1023, -511, 511));
-  Serial.println(hallSignal);
+  int analogPin = 0;
+  for(int i = 0; i < hallMatrixWidth; i++){
+    for(int j = 0; j < hallMatrixLength; j++){
+      hallSignals[i][j] = transformHallSignal(analogRead(analogPin));
+      analogPin++;
+    }
+  }
+  printMatrix();
+}
+
+int transformHallSignal(int hallSignal){
+  return abs(map(hallSignal, 0, 1023, -511, 511));
+}
+
+void printMatrix(){
+  String output;
+  output.concat("---------------------\n");
+  for(int i = 0; i < hallMatrixWidth; i++){
+    for(int j = 0; j < hallMatrixLength; j++){
+      if(j == 0){
+        output.concat(hallSignals[i][j]);
+      }
+      else if(j == (hallMatrixLength - 1)){
+        output.concat(" ");
+        output.concat(hallSignals[i][j]);
+        output.concat("\n");
+      }
+      else{
+        output.concat(" ");
+        output.concat(hallSignals[i][j]);
+      }
+    }
+  }
+  output.concat("---------------------\n");
+  Serial.println(output);
+  delay(1000);
 }
