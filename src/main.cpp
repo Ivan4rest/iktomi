@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <SoftwareSerial.h>
 
 SoftwareSerial connection(0, 1);
@@ -8,8 +9,8 @@ int hallMatrixLength = 3;
 int hallSignals[3][3];
 
 void setup() {
-  connection.begin(9600);
-//  Serial.begin(9600);
+//  connection.begin(9600);
+  Serial.begin(9600);
 }
 
 void loop() {
@@ -21,8 +22,8 @@ void loop() {
     }
   }
 
-  connection.println(getSendingString());
-//  Serial.println(getSendingString());
+//  connection.println(getSendingString());
+  Serial.println(getSendingString());
   delay(1000);
 }
 
