@@ -78,7 +78,7 @@ class HallSensor
         void setMM(short rawValue8mm)
         {
             setValue(rawValue8mm);
-            this->mm = getValue() / 8;
+            this->mm = (getMaxValue() - getValue()) / 8;
         }
 
         float getMM()
