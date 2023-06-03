@@ -9,19 +9,21 @@ class HallSensor
         float mm;
         short minValue;
         short maxValue;
-        short multiplexerNumber;
-        short multiplexerCode;
-
+        short analogPin;
 
     public:
-        HallSensor(short xCoordinate, short yCoordinate, short multiplexerNumber, short multiplexerCode)
+
+        short multiplexerDigitPins[4];
+        bool multiplexerCode[4];
+
+        HallSensor(short xCoordinate, short yCoordinate, short analogPin, short multiplexerCode)
         {
             setXCoordinate(xCoordinate);
             setYCoordinate(yCoordinate);
-            setMultiplexerNumber(multiplexerNumber);
             setMultiplexerCode(multiplexerCode);
             setMinValue(511);
             setMaxValue(0);
+            setAnalogPin(analogPin);
         }
 
         short transformRawValue(short rawValue)
@@ -86,32 +88,6 @@ class HallSensor
             return this->mm;
         }
 
-        void setMultiplexerNumber(short multiplexerNumber)
-        {
-            if(multiplexerNumber >= 0 && multiplexerNumber <= 8)
-            {
-                this->multiplexerNumber = multiplexerNumber;
-            }
-        }
-
-        short getMultiplexerNumber()
-        {
-            return this->multiplexerNumber;
-        }
-
-        void setMultiplexerCode(short multiplexerCode)
-        {
-            if(multiplexerCode >= 0 && multiplexerCode <= 1111)
-            {
-                this->multiplexerCode = multiplexerCode;
-            }
-        }
-
-        short getMultiplexerCode()
-        {
-            return this->multiplexerCode;
-        }
-
         void setValue(short rawValue)
         {
             rawValue = transformRawValue(rawValue);
@@ -129,5 +105,27 @@ class HallSensor
         float getValue()
         {
             return this->value;
+        }
+
+        void setAnalogPin(short analogPin)
+        {
+            if(analogPin > 0 && analogPin < 9)
+            {
+                this->analogPin = analogPin;
+            }
+        }
+
+        short getAnalogPin()
+        {
+            return this->analogPin;
+        }
+
+        void setMultiplexerCode(short multiplexerCode)
+        {
+            for(int i = 0; i < 4; ++i)
+            {
+                this->multiplexerCode[i] = multiplexerCode % 2;
+                multiplexerCode /= 2;
+            }
         }
 };
