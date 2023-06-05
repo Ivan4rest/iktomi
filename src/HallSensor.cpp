@@ -16,6 +16,8 @@ class HallSensor
         short multiplexerDigitPins[4];
         bool multiplexerCode[4];
 
+        HallSensor(){}
+
         HallSensor(short xCoordinate, short yCoordinate, short analogPin, short multiplexerCode)
         {
             setXCoordinate(xCoordinate);
@@ -53,7 +55,7 @@ class HallSensor
 
         void setMinValue(short minValue)
         {
-            if(minValue >= 0 && minValue <= 511)
+            if (minValue >= 0 && minValue <= 511)
             {
                 this->minValue = minValue;
             }
@@ -66,7 +68,7 @@ class HallSensor
 
         void setMaxValue(short maxValue)
         {
-            if(maxValue >= 0 && maxValue <= 511)
+            if (maxValue >= 0 && maxValue <= 511)
             {
                 this->maxValue = maxValue;
             }
@@ -77,9 +79,8 @@ class HallSensor
             return this->maxValue;
         }
 
-        void setMM(short rawValue8mm)
+        void setMM()
         {
-            setValue(rawValue8mm);
             this->mm = (getMaxValue() - getValue()) / 8;
         }
 
@@ -91,11 +92,11 @@ class HallSensor
         void setValue(short rawValue)
         {
             rawValue = transformRawValue(rawValue);
-            if(rawValue < getMinValue())
+            if (rawValue < getMinValue())
             {
                 setMinValue(rawValue);
             }
-            if(rawValue > getMaxValue())
+            if (rawValue > getMaxValue())
             {
                 setMaxValue(rawValue);
             }
@@ -104,12 +105,17 @@ class HallSensor
 
         float getValue()
         {
+            for (int i = 0; i < 3; ++i)
+            {
+                digitalWrite(multiplexerDigitPins[i], multiplexerCode[i]);
+            }
+            setValue(analogRead(getAnalogPin()));
             return this->value;
         }
 
         void setAnalogPin(short analogPin)
         {
-            if(analogPin > 0 && analogPin < 9)
+            if (analogPin >= 0 && analogPin < 9)
             {
                 this->analogPin = analogPin;
             }
@@ -122,7 +128,7 @@ class HallSensor
 
         void setMultiplexerCode(short multiplexerCode)
         {
-            for(int i = 0; i < 4; ++i)
+            for (int i = 0; i < 4; ++i)
             {
                 this->multiplexerCode[i] = multiplexerCode % 2;
                 multiplexerCode /= 2;
