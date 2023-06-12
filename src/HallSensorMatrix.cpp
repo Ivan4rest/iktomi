@@ -5,12 +5,13 @@ class HallSensorMatrix
 {
     private:
         static const short matrixSize {12};
-        short indexesOfWorkingSensors[3][2] { {1, 1}, {1, 2}, {2, 1} };
-        const float error = 0.1;
+        const short error = 20;
 
     public:
 
         HallSensor hallSensors[matrixSize][matrixSize];
+
+        short indexesOfWorkingSensors[3][2] { {1, 1}, {1, 2}, {2, 1} };
 
         HallSensorMatrix()
         {
@@ -50,21 +51,45 @@ class HallSensorMatrix
             }
         }
 
-        void calibrate()
+        bool calibrate8mmValue()
         {
             for (int i = 0; i < matrixSize; ++i)
             {
                 for (int j = 0; j < matrixSize; ++j)
                 {
-                    hallSensors[i][j].setMM();
+                    hallSensors[i][j].setValue8mm();
                 }
             }
+            return true;
+        }
+
+        bool calibrateMinValue()
+        {
+            for (int i = 0; i < matrixSize; ++i)
+            {
+                for (int j = 0; j < matrixSize; ++j)
+                {
+                    hallSensors[i][j].setMinValue();
+                }
+            }
+            return true;
+        }
+
+        bool calibrateMaxValue()
+        {
+            for (int i = 0; i < matrixSize; ++i)
+            {
+                for (int j = 0; j < matrixSize; ++j)
+                {
+                    hallSensors[i][j].setMaxValue();
+                }
+            }
+            return true;
         }
 
         void findWorkingSensors()
         {
             float checkValue = 0;
-            float currentValue = 0;
             short index0 = indexesOfWorkingSensors[0][0];
             short index1 = indexesOfWorkingSensors[0][1];
 
@@ -80,19 +105,19 @@ class HallSensorMatrix
             if (index1 > matrixSize - 2)
                 index1 = matrixSize - 2;
             
-            for (int i = index0 - 1; i < index0 + 1; ++i)
-            {
-                for (int j = index1 - 1; j < index1 + 1; ++j)
-                {
-                    currentValue = hallSensors[i][j].getValue();
-                    if ((currentValue > (hallSensors[i][j].getMinValue() / hallSensors[i][j].getMM() + getError())) && (currentValue > checkValue))
-                    {
-                        checkValue = currentValue;
-                        indexesOfWorkingSensors[0][0] = i;
-                        indexesOfWorkingSensors[0][1] = j;
-                    }
-                }
-            }
+           for (int i = index0 - 1; i < index0 + 1; ++i)
+           {
+               for (int j = index1 - 1; j < index1 + 1; ++j)
+               {
+                   hallSensors[i][j].setValue();
+                   if ((hallSensors[i][j].getValue() > (hallSensors[i][j].getMinValue() + getError())) && (hallSensors[i][j].getValue() > checkValue))
+                   {
+                       checkValue = hallSensors[i][j].getValue();
+                       indexesOfWorkingSensors[0][0] = i;
+                       indexesOfWorkingSensors[0][1] = j;
+                   }
+               }
+           }
 
             if (checkValue == 0)
             {
@@ -100,10 +125,10 @@ class HallSensorMatrix
                 {
                     for (int j = 0; j < matrixSize; ++j)
                     {
-                        currentValue = hallSensors[i][j].getValue();
-                        if ((currentValue > (hallSensors[i][j].getMinValue() / hallSensors[i][j].getMM() + getError())) && (currentValue > checkValue))
+                        hallSensors[i][j].setValue();
+                        if (hallSensors[i][j].getValue() > checkValue)
                         {
-                            checkValue = currentValue;
+                            checkValue = hallSensors[i][j].getValue();
                             indexesOfWorkingSensors[0][0] = i;
                             indexesOfWorkingSensors[0][1] = j;
                         }
