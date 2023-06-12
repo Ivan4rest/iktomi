@@ -5,8 +5,8 @@ class HallSensor
     private:
         short xCoordinate;
         short yCoordinate;
-        float value;
-        float mm;
+        short value;
+        short value8mm;
         short minValue;
         short maxValue;
         short analogPin;
@@ -23,8 +23,8 @@ class HallSensor
             setXCoordinate(xCoordinate);
             setYCoordinate(yCoordinate);
             setMultiplexerCode(multiplexerCode);
-            setMinValue(511);
-            setMaxValue(0);
+            setMinValue();
+            setMaxValue();
             setAnalogPin(analogPin);
         }
 
@@ -53,12 +53,14 @@ class HallSensor
             return this->yCoordinate;
         }
 
+        void setMinValue()
+        {
+            this->minValue = getSignal();
+        }
+
         void setMinValue(short minValue)
         {
-            if (minValue >= 0 && minValue <= 511)
-            {
-                this->minValue = minValue;
-            }
+            this->minValue = minValue;
         }
 
         short getMinValue()
@@ -66,12 +68,14 @@ class HallSensor
             return this->minValue;
         }
 
+        void setMaxValue()
+        {
+            this->maxValue = getSignal();
+        }
+
         void setMaxValue(short maxValue)
         {
-            if (maxValue >= 0 && maxValue <= 511)
-            {
-                this->maxValue = maxValue;
-            }
+            this->maxValue = maxValue;
         }
 
         short getMaxValue()
@@ -79,38 +83,46 @@ class HallSensor
             return this->maxValue;
         }
 
-        void setMM()
+        void setValue8mm()
         {
-            this->mm = (getMaxValue() - getValue()) / 8;
+            this->value8mm = getSignal();
         }
 
-        float getMM()
+        short getValue8mm()
         {
-            return this->mm;
+            return this->value8mm;
         }
 
-        void setValue(short rawValue)
+        void setValue()
         {
-            rawValue = transformRawValue(rawValue);
-            if (rawValue < getMinValue())
+            this->value = getSignal();
+            if (getValue() < getMinValue())
             {
-                setMinValue(rawValue);
+                setMinValue(getValue());
             }
-            if (rawValue > getMaxValue())
+            if (getValue() > getMaxValue())
             {
-                setMaxValue(rawValue);
+                setMaxValue(getValue());
             }
-            this->value = static_cast<float>(getMaxValue() - rawValue) / getMM();
         }
 
-        float getValue()
+        short getValue()
         {
-            for (int i = 0; i < 3; ++i)
+            return this->value;
+        }
+
+        short getSignal()
+        {
+            for (int i = 0; i < 4; ++i)
             {
                 digitalWrite(multiplexerDigitPins[i], multiplexerCode[i]);
             }
-            setValue(analogRead(getAnalogPin()));
-            return this->value;
+            return transformRawValue(analogRead(getAnalogPin()));
+        }
+
+        float getValueInMM()
+        {
+            return getValue() / ((getMaxValue() - getValue8mm()) / 8);
         }
 
         void setAnalogPin(short analogPin)
