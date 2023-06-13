@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "HallSensor.cpp"
+#include "Vector.cpp"
 
 class HallSensorMatrix
 {
@@ -18,7 +19,7 @@ class HallSensorMatrix
             setHallSensors();
         }
 
-        float getError()
+        short getError()
         {
             return this->error;
         }
@@ -248,5 +249,32 @@ class HallSensorMatrix
                 }
                 indexesOfWorkingSensors[2][1] = indexesOfWorkingSensors[0][1];
             }
+        }
+
+        Vector getVector()
+        {
+            double x {0};
+            double y {0};
+            double z {0};
+
+            double x1 {hallSensors[indexesOfWorkingSensors[0][0]][indexesOfWorkingSensors[0][1]].getXCoordinate()};
+            double y1 {hallSensors[indexesOfWorkingSensors[0][0]][indexesOfWorkingSensors[0][1]].getYCoordinate()};
+            double a {hallSensors[indexesOfWorkingSensors[0][0]][indexesOfWorkingSensors[0][1]].getValueInMM()};
+
+            double x2 {hallSensors[indexesOfWorkingSensors[1][0]][indexesOfWorkingSensors[1][1]].getXCoordinate()};
+            double y2 {hallSensors[indexesOfWorkingSensors[1][0]][indexesOfWorkingSensors[1][1]].getYCoordinate()};
+            double b {hallSensors[indexesOfWorkingSensors[1][0]][indexesOfWorkingSensors[1][1]].getValueInMM()};
+
+            double x3 {hallSensors[indexesOfWorkingSensors[2][0]][indexesOfWorkingSensors[2][1]].getXCoordinate()};
+            double y3 {hallSensors[indexesOfWorkingSensors[2][0]][indexesOfWorkingSensors[2][1]].getYCoordinate()};
+            double c {hallSensors[indexesOfWorkingSensors[2][0]][indexesOfWorkingSensors[2][1]].getValueInMM()};
+
+            x = ((a*a - b*b - x1*x1 + x2*x2 - y1*y1 + y2*y2) * (y2 - y3) + (c*c - b*b + x2*x2 - x3*x3 + y2*y2 - y3*y3) * (y1 - y2)) / (2 * (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)));
+
+            y = (c*c * (x1 - x2) + a*a * x2 - x1*x1 * x2 + x1 * x2*x2 - a*a * x3 + x1*x1 * x3 - x2*x2 * x3 - x1 * x3*x3 + x2 * x3*x3 + b*b * (-x1 + x3) - x2 * y1*y1 + x3 * y1*y1 + x1 * y2*y2 - x3 * y2*y2 - x1 * y3*y3 + x2 * y3*y3) / (2 * (x3 * (y1 - y2) + x1 * (y2 - y3) + x2 * (-y1 + y3)));
+
+            z = sqrt(a*a - (x - x1) * (x - x1) - (y - y1) * (y - y1));
+
+            return Vector(x, y, z);
         }
 };
