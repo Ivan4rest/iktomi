@@ -13,7 +13,7 @@ class HallSensor
 
     public:
 
-        short multiplexerDigitPins[4];
+        short multiplexerDigitPins[5];
         bool multiplexerCode[4];
 
         HallSensor(){}
@@ -113,10 +113,12 @@ class HallSensor
 
         short getSignal()
         {
+            digitalWrite(multiplexerDigitPins[4], 1);
             for (int i = 0; i < 4; ++i)
             {
                 digitalWrite(multiplexerDigitPins[i], multiplexerCode[i]);
             }
+            digitalWrite(multiplexerDigitPins[4], 0);
             return transformRawValue(analogRead(getAnalogPin()));
         }
 

@@ -34,13 +34,13 @@ class HallSensorMatrix
                 for (int j = 0; j < 4; ++j)
                 {
                     analogPin = 0;
-                    digitalPin = 18;
+                    digitalPin = 9;
                     for (int n = i * 3; n < i * 3 + 3; ++n)
                     {
                         for (int k = j * 3; k < j * 3 + 3; ++k)
                         {
                             hallSensors[n][k] = HallSensor(n * 4 + 2, k * 4 + 2, analogPin, multiplexerCode);
-                            for (int d = 0; d < 4; ++d)
+                            for (int d = 0; d < 5; ++d)
                             {
                                 hallSensors[n][k].multiplexerDigitPins[d] = digitalPin++;
                             }
