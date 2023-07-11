@@ -1,73 +1,72 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
+#include "HallSensorMatrix.cpp"
 
-SoftwareSerial connection(0, 1);
+//SoftwareSerial connection(0, 1);
 
-int hallMatrixWidth = 3;
-int hallMatrixLength = 3;
+HallSensorMatrix matrix = HallSensorMatrix();
 
-int hallSignals[3][3];
+bool isCalibrate8mmValue {false};
+bool isCalibrateMinValue {false};
+bool isCalibrateMaxValue {false};
+
+String output = "";
 
 void setup() {
 //  connection.begin(9600);
-  Serial.begin(9600);
+  Serial.begin(115200);
+
+  pinMode(0, INPUT);
+  pinMode(1, OUTPUT);
+  
+  for(int i = 9; i <= 53; ++i)
+  {
+    pinMode(i, OUTPUT);
+  }
+
+  pinMode(A0, INPUT);
+  pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+  pinMode(A3, INPUT);
+  pinMode(A4, INPUT);
+  pinMode(A5, INPUT);
+  pinMode(A6, INPUT);
+  pinMode(A7, INPUT);
+  pinMode(A8, INPUT);
+
+  calibrate();
 }
 
 void loop() {
-  int analogPin = 0;
-  for(int i = 0; i < hallMatrixWidth; i++){
-    for(int j = 0; j < hallMatrixLength; j++){
-      hallSignals[i][j] = transformHallSignal(analogRead(analogPin));
-      analogPin++;
-    }
-  }
+  delay(20);
+  
+  if(isCalibrate8mmValue && isCalibrateMinValue && isCalibrateMaxValue)
+  {
+    matrix.findWorkingSensors();
+    matrix.getVector();
 
-//  connection.println(getSendingString());
-  Serial.println(getSendingString());
-  delay(1000);
+    int x1 = static_cast<int>(matrix.hallSensors[matrix.indexesOfWorkingSensors[0][0]][matrix.indexesOfWorkingSensors[0][1]].getXCoordinate());
+    int y1 = static_cast<int>(matrix.hallSensors[matrix.indexesOfWorkingSensors[0][0]][matrix.indexesOfWorkingSensors[0][1]].getYCoordinate());
+    int a = static_cast<int>(matrix.hallSensors[matrix.indexesOfWorkingSensors[0][0]][matrix.indexesOfWorkingSensors[0][1]].getValueInMM());
+    
+    output = "";
+
+    output.concat(static_cast<int>(matrix.x));
+    output.concat(";");
+    output.concat(static_cast<int>(matrix.y));
+    output.concat(";");
+    output.concat(static_cast<int>(matrix.z));
+  
+    Serial.println(output);
+  }
 }
 
-int transformHallSignal(int hallSignal){
-  return abs(map(hallSignal, 0, 1023, -511, 511));
-}
 
-String getSendingString(){
-  String output;
-  for(int i = 0; i < hallMatrixWidth; i++){
-    for(int j = 0; j < hallMatrixLength; j++){
-      if(i == 0 && j == 0){
-        output.concat(hallSignals[i][j]);
-      }
-      else{
-        output.concat(" ");
-        output.concat(hallSignals[i][j]);
-      }
-    }
-  }
-  output.concat(";");
-  return output;
-}
-
-void printMatrix(){
-  String output;
-  output.concat("---------------------\n");
-  for(int i = 0; i < hallMatrixWidth; i++){
-    for(int j = 0; j < hallMatrixLength; j++){
-      if(j == 0){
-        output.concat(hallSignals[i][j]);
-      }
-      else if(j == (hallMatrixLength - 1)){
-        output.concat(" ");
-        output.concat(hallSignals[i][j]);
-        output.concat("\n");
-      }
-      else{
-        output.concat(" ");
-        output.concat(hallSignals[i][j]);
-      }
-    }
-  }
-  output.concat("---------------------\n");
-  Serial.println(output);
-  delay(1000);
+void calibrate()
+{
+  isCalibrateMinValue = matrix.calibrateMinValue();
+  delay(3000);
+  isCalibrateMaxValue = matrix.calibrateMaxValue();
+  delay(5000);
+  isCalibrate8mmValue = matrix.calibrate8mmValue();
 }
