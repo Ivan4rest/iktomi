@@ -124,7 +124,7 @@ class HallSensor
 
         float getValueInMM()
         {
-            return getValue() / ((getMaxValue() - getValue8mm()) / 8);
+            return (getMaxValue() - getValue()) / ((getMaxValue() - getValue8mm()) / 8);
         }
 
         void setAnalogPin(short analogPin)
